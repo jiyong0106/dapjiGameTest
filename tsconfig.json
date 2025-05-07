@@ -14,12 +14,13 @@
     "noEmit": true,
 
     /* Linting */
+    "erasableSyntaxOnly": true,
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true
+    "noUncheckedSideEffectImports": true,
+    "strictPropertyInitialization": false
   },
   "include": ["src"]
 }
