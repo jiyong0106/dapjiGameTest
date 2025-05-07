@@ -1,65 +1,97 @@
 import { Scene } from "phaser";
 
-/**
- * Game 씬
- *
- * 이 씬은 실제 게임 플레이 화면을 담당하며, 사용자에게 메시지를 보여주고
- * 클릭 시 GameOver 씬으로 전환하는 간단한 인터랙션을 포함합니다.
- *
- * - 배경 이미지(`background`)를 중앙에 반투명하게 표시
- * - 메시지 텍스트(`msg_text`)를 가운데 출력
- * - 화면 클릭 시 'GameOver' 씬으로 전환
- */
 export class Game extends Scene {
-  /** 메인 카메라 객체 */
-  camera: Phaser.Cameras.Scene2D.Camera;
+  /** 플레이어 객체 */
+  player!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
+  /** 방향키 입력 */
+  cursor!: Phaser.Types.Input.Keyboard.CursorKeys;
 
-  /** 배경 이미지 객체 */
-  background: Phaser.GameObjects.Image;
-
-  /** 안내 텍스트 객체 */
-  msg_text: Phaser.GameObjects.Text;
-
-  /**
-   * Game 씬 생성자
-   * super('Game')을 통해 씬 키를 'Game'으로 설정
-   */
   constructor() {
     super("Game");
   }
 
-  /**
-   * 씬이 생성될 때 호출되는 메서드
-   * 게임 오브젝트들을 배치하고, 사용자 입력 이벤트를 등록합니다.
-   */
+  preload() {
+    // 타일맵 JSON (.tmj)
+    this.load.tilemapTiledJSON("map", "assets/map.tmj");
+
+    // 타일셋 이미지 (Tiled에서 연결한 tiles 이름과 일치해야 함)
+    this.load.image("tiles", "assets/tiles.png");
+
+    // 플레이어 스프라이트 시트
+    this.load.spritesheet("player", "assets/player.png", {
+      frameWidth: 32,
+      frameHeight: 32,
+    });
+  }
+
   create() {
-    // 카메라 설정: 배경색을 연두색(0x00ff00)으로 설정
-    this.camera = this.cameras.main;
-    this.camera.setBackgroundColor(0x00ff00);
+    // 1. 타일맵 로드
+    const map = this.make.tilemap({ key: "map" });
+    const tileset = map.addTilesetImage("tiles", "tiles");
 
-    // 배경 이미지 추가 (중앙 좌표: 512, 384)
-    this.background = this.add.image(512, 384, "background");
-    this.background.setAlpha(0.5); // 반투명 처리
+    // 2. 타일 레이어 생성
+    const layer = map.createLayer("Tile Layer 1", tileset!, 0, 0);
+    layer?.setDepth(0); // 배경 레이어
 
-    // 메시지 텍스트 추가
-    this.msg_text = this.add.text(
-      512,
-      384,
-      "Make something fun!\nand share it with us:\nsupport@phaser.io",
-      {
-        fontFamily: "Arial Black",
-        fontSize: 38,
-        color: "#ffffff",
-        stroke: "#000000",
-        strokeThickness: 8,
-        align: "center",
-      }
-    );
-    this.msg_text.setOrigin(0.5); // 텍스트 중심 정렬
+    // 3. 플레이어 생성 (타일 위에 위치하도록)
+    this.player = this.physics.add.sprite(100, 100, "player");
+    // this.player.setScale(2);
+    this.player.setDepth(1); // 타일보다 위에 그리기
 
-    // 마우스 클릭(또는 터치) 한 번 발생 시 GameOver 씬으로 이동
+    // 4. 방향키 입력 등록
+    this.cursor = this.input.keyboard!.createCursorKeys();
+
+    // 5. 걷기 애니메이션 정의
+    this.anims.create({
+      key: "walk-down",
+      frames: this.anims.generateFrameNumbers("player", { start: 0, end: 3 }),
+      frameRate: 10,
+      repeat: -1,
+    });
+    this.anims.create({
+      key: "walk-left",
+      frames: this.anims.generateFrameNumbers("player", { start: 4, end: 7 }),
+      frameRate: 10,
+      repeat: -1,
+    });
+    this.anims.create({
+      key: "walk-right",
+      frames: this.anims.generateFrameNumbers("player", { start: 8, end: 11 }),
+      frameRate: 10,
+      repeat: -1,
+    });
+    this.anims.create({
+      key: "walk-up",
+      frames: this.anims.generateFrameNumbers("player", { start: 12, end: 15 }),
+      frameRate: 10,
+      repeat: -1,
+    });
+
+    // ✅ 클릭 시 GameOver 씬 이동
     this.input.once("pointerdown", () => {
       this.scene.start("GameOver");
     });
+  }
+
+  update() {
+    const speed = 100;
+    const { left, right, up, down } = this.cursor;
+    this.player.setVelocity(0);
+
+    if (left?.isDown) {
+      this.player.setVelocityX(-speed);
+      this.player.anims.play("walk-left", true);
+    } else if (right?.isDown) {
+      this.player.setVelocityX(speed);
+      this.player.anims.play("walk-right", true);
+    } else if (up?.isDown) {
+      this.player.setVelocityY(-speed);
+      this.player.anims.play("walk-up", true);
+    } else if (down?.isDown) {
+      this.player.setVelocityY(speed);
+      this.player.anims.play("walk-down", true);
+    } else {
+      this.player.anims.stop();
+    }
   }
 }

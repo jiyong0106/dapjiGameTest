@@ -24,7 +24,7 @@ export class Boot extends Scene {
    * 리소스는 메모리에 로드되며, 아직 화면에는 표시되지 않습니다.
    */
   preload() {
-    this.load.image("background", "assets/bg.png");
+    this.load.image("background", "assets/player.png");
   }
 
   /**

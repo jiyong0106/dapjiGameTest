@@ -39,7 +39,7 @@ export class MainMenu extends Scene {
 
     // 텍스트 출력
     this.title = this.add
-      .text(512, 460, "Main Menu", {
+      .text(512, 460, "Click to Start", {
         fontFamily: "Arial Black",
         fontSize: 38,
         color: "#ffffff",

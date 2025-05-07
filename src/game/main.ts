@@ -18,10 +18,20 @@ import { Preloader } from "./scenes/Preloader";
  */
 const config: Phaser.Types.Core.GameConfig = {
   type: AUTO,
-  width: 1024,
-  height: 768,
   parent: "game-container",
-  backgroundColor: "#028af8",
+  backgroundColor: "#ffffff",
+  width: 960,
+  height: 768,
+  physics: {
+    default: "arcade",
+    arcade: {
+      gravity: {
+        y: 0,
+        x: 0,
+      },
+      debug: false, // 충돌 박스가 보이길 원하면 true
+    },
+  },
   scene: [
     Boot, // 초기 로딩 전용 씬
     Preloader, // 리소스 로딩 씬
@@ -40,8 +50,13 @@ const config: Phaser.Types.Core.GameConfig = {
  * 이 함수는 src/main.ts에서 호출되며, Phaser 게임을 'game-container' 요소에 마운트합니다.
  */
 const StartGame = (parent: string) => {
+  // const width = window.innerWidth;
+  // const height = window.innerHeight - 100;
+
   // parent 설정만 외부에서 덮어씌우고, 나머지는 config를 그대로 사용
   //게임이 그려질 영역 상위 id에 parent가 들어감
+
+  // return new Game({ ...config, width, height, parent });
   return new Game({ ...config, parent });
 };
 
